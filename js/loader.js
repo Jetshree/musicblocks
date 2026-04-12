@@ -377,7 +377,13 @@ requirejs(["i18next", "i18nextHttpBackend"], function (i18next, i18nextHttpBacke
             // These modules are already available as globals before RequireJS loads them
             const PRELOADED_SCRIPTS = [
                 { name: "easeljs.min", export: () => window.createjs },
-                { name: "tweenjs.min", export: () => window.createjs }
+                { name: "tweenjs.min", export: () => window.createjs },
+                { name: "jquery", export: () => window.jQuery },
+                { name: "jquery-ui", export: () => window.jQuery.ui },
+                { name: "materialize", export: () => window.Materialize || window.M },
+                { name: "abc", export: () => window.ABCJS },
+                { name: "Tone", export: () => window.Tone },
+                { name: "howler", export: () => window.Howl }
             ];
 
             PRELOADED_SCRIPTS.forEach(mod => {
