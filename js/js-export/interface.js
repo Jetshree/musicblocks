@@ -123,6 +123,13 @@ class JSInterface {
         x: "X",
         y: "Y",
         heading: "HEADING",
+        // Media blocks
+        bottompos: "BOTTOMPOS",
+        camera: "CAMERA",
+        // Heap blocks
+        heap: "HEAP",
+        heapLength: "HEAPLENGTH",
+        heapEmpty: "HEAPEMPTY",
         // Pen blocks
         pensize: "PENSIZE",
         color: "COLOR",
@@ -201,6 +208,11 @@ class JSInterface {
         setdrum: "setDrum",
         mapdrum: "mapPitchToDrum",
         playnoise: "playNoise",
+        // Heap blocks
+        emptyHeap: "emptyHeap",
+        reverseHeap: "reverseHeap",
+        setHeapEntry: "setHeapEntry",
+        push: "push",
         // Number blocks
         random: "MathUtility.doRandom",
         oneOf: "MathUtility.doOneOf",
@@ -1818,6 +1830,17 @@ class JSInterface {
         ]
     };
 }
+// If constraints were loaded before this file and stashed on the global,
+// attach them now to the newly-defined `JSInterface` class.
+if (typeof globalThis !== "undefined" && globalThis.__MB_pending_methodArgConstraints) {
+    JSInterface._methodArgConstraints = globalThis.__MB_pending_methodArgConstraints;
+    try {
+        delete globalThis.__MB_pending_methodArgConstraints;
+    } catch (e) {
+        // ignore
+    }
+}
+
 if (typeof module !== "undefined" && module.exports) {
     module.exports = JSInterface;
 }
