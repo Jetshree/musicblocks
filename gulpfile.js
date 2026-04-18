@@ -7,6 +7,7 @@
 // Initialize modules
 // Importing specific gulp API functions lets us write them below as series() instead of gulp.series()
 const { src, dest, watch, series, parallel } = require("gulp");
+// Importing all the Gulp-related packages we want to use
 const sourcemaps = require("gulp-sourcemaps");
 const sass = require("gulp-sass")(require("sass"));
 const concat = require("gulp-concat");
@@ -30,7 +31,7 @@ const files = {
         "node_modules/jquery-ui-dist/jquery-ui.min.js",
         "node_modules/materialize-css/dist/js/materialize.min.js",
         "node_modules/abcjs/dist/abcjs-basic-min.js",
-        "node_modules/howler/dist/howler.min.js",
+        "node_modules/howler/howler.min.js",
         "node_modules/tone/build/Tone.js"
     ]
 };
@@ -76,6 +77,8 @@ const cacheBustTask = () => {
         .pipe(dest("."));
 };
 
+//This gulp task formats the js files
+
 const prettify = () => {
     return gulp
         .src(files.jsPath)
@@ -87,6 +90,8 @@ const prettify = () => {
         )
         .pipe(gulp.dest("./dist/js"));
 };
+
+//to check whether or not files adhere to Prettier's formatting
 
 const validate = () => {
     return gulp.src(files.jsPath).pipe(prettier.check({ singleQuote: true, trailingComma: "all" }));
@@ -101,6 +106,7 @@ const watchTask = () => {
     );
 };
 
+// Export the default Gulp task so it can be run
 // Runs the sass ,css and js tasks simultaneously
 // then runs prettify, cacheBust, validate, then starts watch (long-running)
 exports.vendorTask = vendorTask;
