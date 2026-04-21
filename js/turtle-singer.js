@@ -271,6 +271,11 @@ class Singer {
             }
         });
         this.activeVoices.clear();
+
+        const stopBtn = document.getElementById("stop");
+        if (stopBtn) {
+            stopBtn.style.display = "none";
+        }
     }
 
     // ========= Class variables ==============================================
@@ -783,6 +788,10 @@ class Singer {
      */
     static setSynthVolume(logo, turtle, synth, volume, blk) {
         volume = Math.min(Math.max(volume, 0), 100);
+
+        if (logo.synth && typeof logo.synth.resolveInstrumentName === "function") {
+            synth = logo.synth.resolveInstrumentName(synth);
+        }
 
         switch (synth) {
             case "noise1":
@@ -2238,6 +2247,15 @@ class Singer {
                     }
 
                     if (notes.length > 0) {
+                        const stopBtn = document.getElementById("stop");
+                        if (stopBtn) {
+                            if (stopBtn.style.display !== "inline-block") {
+                                stopBtn.style.display = "inline-block";
+                            }
+                            if (stopBtn.style.color !== "#ea174c") {
+                                stopBtn.style.color = "#ea174c";
+                            }
+                        }
                         const len = notes[0].length;
                         if (typeof notes[0] === "number") {
                             tur.singer.currentOctave = frequencyToPitch(notes[0])[1];

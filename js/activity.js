@@ -1559,6 +1559,14 @@ class Activity {
             const importConfirm = document.createElement("button");
             importConfirm.classList.add("confirm-button");
             importConfirm.textContent = _("Confirm");
+            importConfirm.style.backgroundColor = platformColor.blueButton;
+            importConfirm.style.color = platformColor.blueButtonText;
+            importConfirm.style.border = "none";
+            importConfirm.style.borderRadius = "4px";
+            importConfirm.style.padding = "8px 16px";
+            importConfirm.style.fontWeight = "bold";
+            importConfirm.style.cursor = "pointer";
+            importConfirm.style.marginRight = "16px";
             importConfirm.addEventListener("click", () => {
                 const maxNoteBlocks = select.value;
                 require(["activity/midi"], function () {
@@ -1605,7 +1613,7 @@ class Activity {
             confirmBtn.classList.add("confirm-button");
             confirmBtn.textContent = _("Confirm");
             confirmBtn.style.backgroundColor = platformColor.blueButton;
-            confirmBtn.style.color = "white";
+            confirmBtn.style.color = platformColor.blueButtonText;
             confirmBtn.style.border = "none";
             confirmBtn.style.borderRadius = "4px";
             confirmBtn.style.padding = "8px 16px";
@@ -1722,6 +1730,11 @@ class Activity {
             this.blocks.activeBlock = null;
             hideDOMLabel();
 
+            // If music is currently playing, stop it first
+            if (this.turtles.running()) {
+                this.logo.doStopTurtles();
+            }
+
             const currentDelay = this.logo.turtleDelay;
             this.logo.turtleDelay = 0;
             if (this.logo?.synth?.resume) {
@@ -1747,18 +1760,29 @@ class Activity {
                 }
 
                 this.logo.runLogoCommands(null, env);
+                const stopBtn = document.getElementById("stop");
+                if (stopBtn) {
+                    stopBtn.style.display = "inline-block";
+                    stopBtn.style.color = window.platformColor.stopIconcolor;
+                }
             } else {
                 if (currentDelay !== 0) {
                     // Keep playing at full speed.
                     this.logo.step();
                 } else {
                     // Stop and restart.
-                    document.getElementById("stop").style.color = "white";
+                    const stopBtn = document.getElementById("stop");
+                    if (stopBtn) {
+                        stopBtn.style.color = "white";
+                    }
                     this.logo.doStopTurtles();
 
                     const that = this;
                     setTimeout(() => {
-                        document.getElementById("stop").style.color = "#ea174c";
+                        const stopBtnDelay = document.getElementById("stop");
+                        if (stopBtnDelay) {
+                            stopBtnDelay.style.color = window.platformColor.stopIconcolor;
+                        }
                         that.logo.runLogoCommands(null, env);
                     }, 500);
                 }
@@ -2250,6 +2274,7 @@ class Activity {
             }
 
             this.logo.doStopTurtles();
+            document.getElementById("stop").style.display = "none";
 
             const widgetTitle = document.getElementsByClassName("wftTitle");
             for (let i = 0; i < widgetTitle.length; i++) {
@@ -3414,7 +3439,10 @@ class Activity {
                             document.getElementById("ui-id-1").contains(e.target))
                     ) {
                         //do nothing when clicked on the menu
-                    } else if (document.getElementsByTagName("tr")[2].contains(e.target)) {
+                    } else if (
+                        document.querySelector("#palette tbody tr") &&
+                        document.querySelector("#palette tbody tr").contains(e.target)
+                    ) {
                         //do nothing when clicked on the search row
                     } else {
                         // this will hide the search bar if someone clicks on menu items
@@ -4865,6 +4893,14 @@ class Activity {
          * When turtle stops running restore stop button to normal state
          */
         this.onStopTurtle = () => {
+            if (this.showBlocksAfterRun) {
+                this.blocks.showBlocks();
+                const stopIcon = document.getElementById("stop");
+                if (stopIcon) {
+                    stopIcon.style.color = "white";
+                }
+                this.showBlocksAfterRun = false;
+            }
             // TODO: plugin support
         };
 
@@ -5592,8 +5628,25 @@ class Activity {
             }
 
             const finalBlock = [];
-            // Some Error are here need to be fixed
             for (const staffIndex in staffBlocksMap) {
+                // Validate that the staff has sufficient block data for linking.
+                // Staves with no notes or incomplete structures from certain
+                // ABC notation inputs can cause crashes when accessing nested
+                // array elements without bounds checking.
+                if (
+                    !staffBlocksMap[staffIndex].baseBlocks ||
+                    staffBlocksMap[staffIndex].baseBlocks.length === 0 ||
+                    !staffBlocksMap[staffIndex].baseBlocks[0] ||
+                    !staffBlocksMap[staffIndex].baseBlocks[0][0] ||
+                    staffBlocksMap[staffIndex].baseBlocks[0][0].length < 4 ||
+                    staffBlocksMap[staffIndex].startBlock.length < 3 ||
+                    !staffBlocksMap[staffIndex].nameddoArray ||
+                    !staffBlocksMap[staffIndex].nameddoArray[staffIndex] ||
+                    staffBlocksMap[staffIndex].nameddoArray[staffIndex].length === 0
+                ) {
+                    finalBlock.push(...staffBlocksMap[staffIndex].startBlock);
+                    continue;
+                }
                 staffBlocksMap[staffIndex].startBlock[
                     staffBlocksMap[staffIndex].startBlock.length - 3
                 ][4][2] =
@@ -5609,6 +5662,16 @@ class Activity {
                     ][0];
                 const repeatblockids = staffBlocksMap[staffIndex].repeatArray;
                 for (const repeatId of repeatblockids) {
+                    // Skip repeat entries with out-of-bounds block indices
+                    if (
+                        repeatId.start < 0 ||
+                        repeatId.end < 0 ||
+                        repeatId.start >= staffBlocksMap[staffIndex].baseBlocks.length ||
+                        repeatId.end >= staffBlocksMap[staffIndex].baseBlocks.length
+                    ) {
+                        continue;
+                    }
+
                     if (repeatId.start === 0) {
                         staffBlocksMap[staffIndex].repeatBlock.push([
                             blockId,
@@ -8001,6 +8064,12 @@ class Activity {
             if (this._initialized) return;
             this._initialized = true;
 
+            // Hide stop button on startup
+            const stopBtn = document.getElementById("stop");
+            if (stopBtn) {
+                stopBtn.style.display = "none";
+            }
+
             // Batch DOM reads before any writes to avoid forced synchronous layout
             this._perfMark("activity.init.start");
             this._clientWidth = document.body.clientWidth;
@@ -8025,11 +8094,7 @@ class Activity {
 
             const that = this;
 
-            if (!jQuery.browser.mozilla) {
-                window.onblur = () => {
-                    doHardStopButton(that, true);
-                };
-            }
+            this.setupWindowBlurHandler(doHardStopButton);
 
             this.stage = new createjs.Stage(this.canvas);
             createjs.Touch.enable(this.stage);
@@ -8827,6 +8892,24 @@ class Activity {
     }
 
     /**
+     * Installs the shared blur-stop hook without overwriting any existing
+     * global blur handler.
+     *
+     * @param {Function} doHardStopButton - Shared stop action callback.
+     */
+    setupWindowBlurHandler(doHardStopButton) {
+        if (jQuery.browser.mozilla) {
+            return;
+        }
+
+        this._handleWindowBlur = () => {
+            doHardStopButton(this, true);
+        };
+
+        this.addEventListener(window, "blur", this._handleWindowBlur);
+    }
+
+    /**
      * Managed removeEventListener that also updates the tracker.
      * @param {EventTarget} target - The DOM element or object to remove the listener from.
      * @param {string} type - The event type.
@@ -8935,19 +9018,11 @@ class Activity {
                 this.palettes.hide();
             }
 
-            if (typeof this.palettes.clear !== "function") {
-                console.warn("Palettes clear method not available");
-                // Fallback clear implementation
-                this.palettes.dict = {};
-                this.palettes.visible = false;
-                this.palettes.activePalette = null;
-                this.palettes.paletteObject = null;
-            } else {
-                this.palettes.clear();
-            }
+            this.palettes.reinitialize(this.palettes);
 
-            // Reinitialize palettes
-            initPalettes(this.palettes);
+            // Increase palette element style.top value for correct alignment
+            const element = docById("palette");
+            element.style.top = `${60 + this.palettes.top}px`;
 
             // Reinitialize blocks
             if (this.blocks) {
