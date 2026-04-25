@@ -25,9 +25,11 @@ requirejs.config({
             exports: "createjs"
         },
         "tweenjs.min": {
+            deps: ["easeljs.min"],
             exports: "createjs"
         },
         "preloadjs.min": {
+            deps: ["easeljs.min", "tweenjs.min"],
             exports: "createjs"
         },
         "Tone": {
@@ -196,9 +198,9 @@ requirejs(["i18next", "i18nextHttpBackend"], function (i18next, i18nextHttpBacke
         if (!canUsePerformance) {
             return {
                 enabled: false,
-                mark: () => {},
-                measure: () => {},
-                report: () => {}
+                mark: () => { },
+                measure: () => { },
+                report: () => { }
             };
         }
 
@@ -425,51 +427,35 @@ requirejs(["i18next", "i18nextHttpBackend"], function (i18next, i18nextHttpBacke
                         "loader.i18n.ready",
                         "loader.core_modules.ready"
                     );
-
-                    // Give scripts a moment to finish executing and set globals
-                    setTimeout(function () {
-                        // Verify core dependencies are loaded
-                        const verificationStatus = {
-                            createjs: typeof window.createjs !== "undefined",
-                            createDefaultStack: typeof window.createDefaultStack !== "undefined",
-                            Logo: typeof window.Logo !== "undefined",
-                            Blocks: typeof window.Blocks !== "undefined",
-                            Turtles: typeof window.Turtles !== "undefined"
-                        };
-
-                        // Check critical dependencies (only createjs is truly critical)
-                        if (typeof window.createjs === "undefined") {
-                            console.error(
-                                "FATAL: createjs (EaselJS/TweenJS) not found. Cannot proceed."
-                            );
-                            alert(t_("Failed to load EaselJS. Please refresh the page."));
-                            return;
-                        }
-
-                        // Proceed with activity loading
-                        requirejs(
-                            ["activity/activity"],
-                            function () {
-                                // Activity loaded successfully
-                                perfTracker.mark("loader.activity_module.ready");
-                                perfTracker.measure(
-                                    "loader.core_modules_to_activity_module_ready",
-                                    "loader.core_modules.ready",
-                                    "loader.activity_module.ready"
-                                );
-                                perfTracker.measure(
-                                    "loader.total_bootstrap",
-                                    "loader.main.start",
-                                    "loader.activity_module.ready"
-                                );
-                                perfTracker.report();
-                            },
-                            function (err) {
-                                console.error("Failed to load activity/activity:", err);
-                                alert(t_("Failed to load Music Blocks. Please refresh the page."));
-                            }
+                    if (typeof window.createjs === "undefined") {
+                        console.error(
+                            "FATAL: createjs (EaselJS/TweenJS) not found. Cannot proceed."
                         );
-                    }, 100); // Small delay to allow globals to be set
+                        alert(t_("Failed to load EaselJS. Please refresh the page."));
+                        return;
+                    }
+
+                    requirejs(
+                        ["activity/activity"],
+                        function () {
+                            perfTracker.mark("loader.activity_module.ready");
+                            perfTracker.measure(
+                                "loader.core_modules_to_activity_module_ready",
+                                "loader.core_modules.ready",
+                                "loader.activity_module.ready"
+                            );
+                            perfTracker.measure(
+                                "loader.total_bootstrap",
+                                "loader.main.start",
+                                "loader.activity_module.ready"
+                            );
+                            perfTracker.report();
+                        },
+                        function (err) {
+                            console.error("Failed to load activity/activity:", err);
+                            alert(t_("Failed to load Music Blocks. Please refresh the page."));
+                        }
+                    );
                 },
                 function (err) {
                     console.error("Core bootstrap failed:", err);
