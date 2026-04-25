@@ -76,12 +76,12 @@ class ProjectViewer {
         let img = proj.ProjectImage;
         if (img === "" || img === null)
             img =
-                proj.ProjectIsMusicBlocks == 1 ? this.PlaceholderMBImage : this.PlaceholderTBImage;
+                proj.ProjectIsMusicBlocks === 1 ? this.PlaceholderMBImage : this.PlaceholderTBImage;
 
         document.getElementById("projectviewer-image").src = img;
         document.getElementById("projectviewer-description").textContent = proj.ProjectDescription;
         const tagcontainer = document.getElementById("projectviewer-tags");
-        tagcontainer.innerHTML = "";
+        tagcontainer.replaceChildren();
         for (let i = 0; i < proj.ProjectTags.length; i++) {
             const chip = document.createElement("div");
             chip.classList.add("chipselect");

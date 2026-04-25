@@ -26,18 +26,34 @@ global.DEFAULTVOICE = "piano";
 global.last = arr => arr[arr.length - 1];
 
 // Mock utils
-global.docById = jest.fn().mockImplementation(id => ({
+const createMockElement = () => ({
     style: {},
     innerHTML: "",
     appendChild: jest.fn(),
-    rows: [{ cells: [{ innerHTML: "" }] }, { cells: [{ innerHTML: "" }] }],
+    replaceChildren: jest.fn().mockImplementation(function (...nodes) {
+        this.innerHTML = "";
+        nodes.forEach(node => {
+            if (node instanceof Node) this.appendChild(node);
+            else if (typeof node === "string") this.appendChild(document.createTextNode(node));
+        });
+    }),
+    rows: [
+        { cells: [{ innerHTML: "", replaceChildren: jest.fn() }] },
+        { cells: [{ innerHTML: "", replaceChildren: jest.fn() }] }
+    ],
     insertRow: jest.fn().mockReturnValue({
         insertCell: jest.fn().mockReturnValue({
             style: {},
-            innerHTML: ""
+            innerHTML: "",
+            replaceChildren: jest.fn()
         })
-    })
-}));
+    }),
+    getElementsByTagName: jest.fn().mockReturnValue([]),
+    setAttribute: jest.fn(),
+    id: ""
+});
+
+global.docById = jest.fn().mockImplementation(id => createMockElement());
 
 global.getNote = jest.fn().mockReturnValue(["C", "4"]);
 global.keySignatureToMode = jest.fn().mockReturnValue(["C", "ionian"]);
@@ -82,17 +98,14 @@ window.widgetWindows = {
         show: jest.fn(),
         destroy: jest.fn(),
         updateTitle: jest.fn(),
-        addButton: jest.fn().mockImplementation(() => ({
-            onclick: () => {}
-        })),
+        addButton: jest.fn().mockImplementation(() => {
+            const btn = createMockElement();
+            btn.onclick = () => {};
+            return btn;
+        }),
         getWidgetBody: jest.fn().mockReturnValue({
             append: jest.fn(),
-            getElementsByTagName: jest.fn().mockReturnValue([
-                {
-                    style: {},
-                    setAttribute: jest.fn()
-                }
-            ])
+            getElementsByTagName: jest.fn().mockReturnValue([createMockElement()])
         }),
         getWidgetFrame: jest.fn().mockReturnValue({ offsetHeight: 500 }),
         getDragElement: jest.fn().mockReturnValue({ offsetHeight: 20 }),
@@ -105,18 +118,7 @@ window.widgetWindows = {
 if (typeof document === "undefined") {
     global.document = {};
 }
-document.createElement = jest.fn().mockImplementation(tag => ({
-    style: {},
-    innerHTML: "",
-    append: jest.fn(),
-    insertRow: jest.fn().mockReturnValue({
-        insertCell: jest.fn().mockReturnValue({
-            style: {},
-            innerHTML: ""
-        })
-    }),
-    getElementById: jest.fn().mockReturnValue({ src: "" })
-}));
+document.createElement = jest.fn().mockImplementation(tag => createMockElement());
 document.getElementById = document.createElement; // For internal usage
 
 describe("ModeWidget", () => {

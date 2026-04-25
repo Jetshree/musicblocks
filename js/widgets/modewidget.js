@@ -108,9 +108,16 @@ class ModeWidget {
         this.modeTableDiv.style.display = "inline";
         this.modeTableDiv.style.visibility = "visible";
         this.modeTableDiv.style.border = "0px";
-        this.modeTableDiv.innerHTML = '<div id="meterWheelDiv"></div>';
-        this.modeTableDiv.innerHTML += '<div id="modePianoDiv" class=""></div>';
-        this.modeTableDiv.innerHTML += '<table id="modeTable"></table>';
+        this.modeTableDiv.replaceChildren();
+        const meterWheelDiv = document.createElement("div");
+        meterWheelDiv.id = "meterWheelDiv";
+        this.modeTableDiv.appendChild(meterWheelDiv);
+        const modePianoDiv = document.createElement("div");
+        modePianoDiv.id = "modePianoDiv";
+        this.modeTableDiv.appendChild(modePianoDiv);
+        const modeTable = document.createElement("table");
+        modeTable.id = "modeTable";
+        this.modeTableDiv.appendChild(modeTable);
 
         this.widgetWindow.getWidgetBody().append(this.modeTableDiv);
 
@@ -136,25 +143,33 @@ class ModeWidget {
             if (this._playingStatus()) {
                 this._playing = false;
 
-                this._playButton.innerHTML = `&nbsp;&nbsp;<img 
-                        src="header-icons/play-button.svg" 
-                        title="${_("Play all")}" 
-                        alt="${_("Play all")}" 
-                        height="${ModeWidget.ICONSIZE}" 
-                        width="${ModeWidget.ICONSIZE}" 
-                        vertical-align="middle"
-                    >&nbsp;&nbsp;`;
+                const img = document.createElement("img");
+                img.src = "header-icons/play-button.svg";
+                img.title = _("Play all");
+                img.alt = _("Play all");
+                img.height = ModeWidget.ICONSIZE;
+                img.width = ModeWidget.ICONSIZE;
+                img.style.verticalAlign = "middle";
+                this._playButton.replaceChildren(
+                    document.createTextNode("\u00A0\u00A0"),
+                    img,
+                    document.createTextNode("\u00A0\u00A0")
+                );
             } else {
                 this._playing = true;
 
-                this._playButton.innerHTML = `&nbsp;&nbsp;<img 
-                        src="header-icons/stop-button.svg" 
-                        title="${_("Stop")}" 
-                        alt="${_("Stop")}" 
-                        height="${ModeWidget.ICONSIZE}" 
-                        width="${ModeWidget.ICONSIZE}" 
-                        vertical-align="middle"
-                    >&nbsp;&nbsp;`;
+                const img = document.createElement("img");
+                img.src = "header-icons/stop-button.svg";
+                img.title = _("Stop");
+                img.alt = _("Stop");
+                img.height = ModeWidget.ICONSIZE;
+                img.width = ModeWidget.ICONSIZE;
+                img.style.verticalAlign = "middle";
+                this._playButton.replaceChildren(
+                    document.createTextNode("\u00A0\u00A0"),
+                    img,
+                    document.createTextNode("\u00A0\u00A0")
+                );
 
                 this._playAll();
             }
@@ -192,7 +207,7 @@ class ModeWidget {
         const row = table.insertRow();
         const cell = row.insertCell();
         // cell.colSpan = 18;
-        cell.innerHTML = "&nbsp;";
+        cell.textContent = "\u00A0";
         cell.style.backgroundColor = platformColor.selectorBackground;
 
         // Set current mode in pie menu.
@@ -231,15 +246,19 @@ class ModeWidget {
      */
     _addButton(row, icon, iconSize, label) {
         const cell = row.insertCell(-1);
-        cell.innerHTML = `&nbsp;&nbsp;<img 
-                src="header-icons/${icon}" 
-                title="${label}" 
-                alt="${label}" 
-                height="${iconSize}" 
-                width="${iconSize}" 
-                vertical-align="middle" 
-                align-content="center"
-            >&nbsp;&nbsp;`;
+        const img = document.createElement("img");
+        img.src = "header-icons/" + icon;
+        img.title = label;
+        img.alt = label;
+        img.height = iconSize;
+        img.width = iconSize;
+        img.style.verticalAlign = "middle";
+        img.style.alignContent = "center";
+        cell.replaceChildren(
+            document.createTextNode("\u00A0\u00A0"),
+            img,
+            document.createTextNode("\u00A0\u00A0")
+        );
         cell.style.width = ModeWidget.BUTTONSIZE + "px";
         cell.style.minWidth = cell.style.width;
         cell.style.maxWidth = cell.style.width;
@@ -299,7 +318,7 @@ class ModeWidget {
 
         // console.debug(_(currentModeName[1]));
         const name = currentModeName[0] + " " + _(currentModeName[1]);
-        table.rows[n].cells[0].innerHTML = name;
+        table.rows[n].cells[0].textContent = name;
         this.widgetWindow.updateTitle(name);
 
         // Set the notes for this mode.
@@ -332,12 +351,22 @@ class ModeWidget {
         modePianoDiv.style.border = "0px";
         modePianoDiv.style.top = "0px";
         modePianoDiv.style.left = "0px";
-        let pianoHTML =
-            '<img src="images/piano_keys.png"  id="modeKeyboard" style="top:0px; left:0px; position:relative;">';
+        modePianoDiv.replaceChildren();
+        const mainImg = document.createElement("img");
+        mainImg.src = "images/piano_keys.png";
+        mainImg.id = "modeKeyboard";
+        mainImg.style.top = "0px";
+        mainImg.style.left = "0px";
+        mainImg.style.position = "relative";
+        modePianoDiv.appendChild(mainImg);
         for (let i = 0; i < 12; i++) {
-            pianoHTML += '<img id="pkey_' + i + '" style="top:0px; left:0px; position:absolute;">';
+            const pKey = document.createElement("img");
+            pKey.id = "pkey_" + i;
+            pKey.style.top = "0px";
+            pKey.style.left = "0px";
+            pKey.style.position = "absolute";
+            modePianoDiv.appendChild(pKey);
         }
-        modePianoDiv.innerHTML = pianoHTML;
 
         // Cache piano key elements to avoid repeated getElementById calls
         this._pianoKeys = [];
@@ -675,14 +704,18 @@ class ModeWidget {
                     if (note_key !== null) {
                         note_key.src = highlightImgs[0];
                     }
-                    this._playButton.innerHTML = `&nbsp;&nbsp;<img 
-                            src="header-icons/play-button.svg" 
-                            title="${_("Play all")}" 
-                            alt="${_("Play all")}" 
-                            height="${ModeWidget.ICONSIZE}" 
-                            width="${ModeWidget.ICONSIZE}" 
-                            vertical-align="middle"
-                        >&nbsp;&nbsp;`;
+                    const img = document.createElement("img");
+                    img.src = "header-icons/play-button.svg";
+                    img.title = _("Play all");
+                    img.alt = _("Play all");
+                    img.height = ModeWidget.ICONSIZE;
+                    img.width = ModeWidget.ICONSIZE;
+                    img.style.verticalAlign = "middle";
+                    this._playButton.replaceChildren(
+                        document.createTextNode("\u00A0\u00A0"),
+                        img,
+                        document.createTextNode("\u00A0\u00A0")
+                    );
                     this._resetNotes();
                     this._locked = false;
                 }, 1000 * time);
@@ -737,14 +770,18 @@ class ModeWidget {
                 this._setTimeout(() => {
                     // Did we just play the last note?
                     this._playing = false;
-                    this._playButton.innerHTML = `&nbsp;&nbsp;<img 
-                            src="header-icons/play-button.svg" 
-                            title="${_("Play all")}" 
-                            alt="${_("Play all")}" 
-                            height="${ModeWidget.ICONSIZE}" 
-                            width="${ModeWidget.ICONSIZE}" 
-                            vertical-align="middle"
-                        >&nbsp;&nbsp;`;
+                    const img = document.createElement("img");
+                    img.src = "header-icons/play-button.svg";
+                    img.title = _("Play all");
+                    img.alt = _("Play all");
+                    img.height = ModeWidget.ICONSIZE;
+                    img.width = ModeWidget.ICONSIZE;
+                    img.style.verticalAlign = "middle";
+                    this._playButton.replaceChildren(
+                        document.createTextNode("\u00A0\u00A0"),
+                        img,
+                        document.createTextNode("\u00A0\u00A0")
+                    );
                     this._resetNotes();
                     this._locked = false;
                 }, 1000 * time);
@@ -904,14 +941,14 @@ class ModeWidget {
                 }
 
                 const name = currentKey + " " + _(mode);
-                table.rows[n].cells[0].innerHTML = name;
+                table.rows[n].cells[0].textContent = name;
                 this.widgetWindow.updateTitle(name);
                 return;
             }
         }
 
         // console.debug('setModeName:' + 'not found');
-        table.rows[n].cells[0].innerHTML = "";
+        table.rows[n].cells[0].replaceChildren();
         this.widgetWindow.updateTitle("");
     }
 
