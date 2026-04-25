@@ -52,7 +52,8 @@ try {
    SHARP, FLAT, buildScale, TREBLE_F, TREBLE_G, GIFAnimator,
    MUSICALMODES, waitForReadiness, i18next, wheelnav, slicePath,
    base64Encode, disableHorizScrollIcon, toFraction, CARTESIANBUTTON,
-   SELECTBUTTON, CLEARBUTTON, piemenuGrid, Midi, ABCJS, ensureABCJS
+   SELECTBUTTON, CLEARBUTTON, piemenuGrid, Midi, ABCJS, ensureABCJS,
+   unescapeHTML
  */
 
 /*
@@ -249,6 +250,7 @@ class Activity {
 
         this.cellSize = 55;
         this.searchSuggestions = [];
+        this._searchCloseListener = null;
         this.homeButtonContainer;
 
         this.msgTimeoutID = null;
@@ -3392,6 +3394,12 @@ class Activity {
                 obj[0].style.visibility = "hidden";
             }
 
+            // Remove the document mousedown listener if it exists
+            if (this._searchCloseListener) {
+                this.removeEventListener(document, "mousedown", this._searchCloseListener);
+                this._searchCloseListener = null;
+            }
+
             this.searchWidget.style.visibility = "hidden";
             this.searchWidget.idInput_custom = "";
         };
@@ -3447,10 +3455,10 @@ class Activity {
                     } else {
                         // this will hide the search bar if someone clicks on menu items
                         that.hideSearchWidget();
-                        document.removeEventListener("mousedown", closeListener);
                     }
                 };
-                document.addEventListener("mousedown", closeListener);
+                this._searchCloseListener = closeListener;
+                this.addEventListener(document, "mousedown", closeListener);
 
                 // Give the browser time to update before selecting
                 // focus.
@@ -6701,7 +6709,10 @@ class Activity {
                         case "drum":
                             // Find the turtle associated with this block.
                             // eslint-disable-next-line no-case-declarations
-                            const turtle = this.turtles.getTurtle(myBlock.value);
+                            const turtle =
+                                myBlock.value < this.turtles.getTurtleCount()
+                                    ? this.turtles.getTurtle(myBlock.value)
+                                    : null;
                             if (turtle === null || turtle === undefined) {
                                 args = {
                                     id: this.turtles.getTurtleCount(),
@@ -8336,17 +8347,17 @@ class Activity {
                                 let obj;
                                 try {
                                     if (cleanData.includes("html")) {
+                                        let extracted;
                                         if (cleanData.includes('id="codeBlock"')) {
-                                            obj = JSON.parse(
-                                                cleanData.match(
-                                                    '<div class="code" id="codeBlock">(.+?)</div>'
-                                                )[1]
-                                            );
+                                            extracted = cleanData.match(
+                                                '<div class="code" id="codeBlock">(.+?)</div>'
+                                            )[1];
                                         } else {
-                                            obj = JSON.parse(
-                                                cleanData.match('<div class="code">(.+?)</div>')[1]
-                                            );
+                                            extracted = cleanData.match(
+                                                '<div class="code">(.+?)</div>'
+                                            )[1];
                                         }
+                                        obj = JSON.parse(unescapeHTML(extracted));
                                     } else {
                                         obj = JSON.parse(cleanData);
                                     }
@@ -8461,9 +8472,17 @@ class Activity {
                             let obj;
                             try {
                                 if (cleanData.includes("html")) {
-                                    obj = JSON.parse(
-                                        cleanData.match('<div class="code">(.+?)</div>')[1]
-                                    );
+                                    let extracted;
+                                    if (cleanData.includes('id="codeBlock"')) {
+                                        extracted = cleanData.match(
+                                            '<div class="code" id="codeBlock">(.+?)</div>'
+                                        )[1];
+                                    } else {
+                                        extracted = cleanData.match(
+                                            '<div class="code">(.+?)</div>'
+                                        )[1];
+                                    }
+                                    obj = JSON.parse(unescapeHTML(extracted));
                                 } else {
                                     obj = JSON.parse(cleanData);
                                 }

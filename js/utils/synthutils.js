@@ -1973,6 +1973,12 @@ function Synth() {
                                     }
                                 });
                             }
+
+                            // Re-establish the dry path so subsequent notes
+                            // that do not use effects still reach the speakers.
+                            if (synth && typeof synth.toDestination === "function") {
+                                synth.toDestination();
+                            }
                         } catch (e) {
                             console.debug("Error disposing effects:", e);
                         }
@@ -1993,6 +1999,11 @@ function Synth() {
                     filter.dispose();
                 }
             });
+
+            // Re-establish the dry path on error as well.
+            if (synth && typeof synth.toDestination === "function") {
+                synth.toDestination();
+            }
         }
     };
 
@@ -2224,6 +2235,7 @@ function Synth() {
     };
 
     this.startSound = (turtle, instrumentName, note) => {
+        if (!instrumentsSource[instrumentName] || !instruments[turtle]?.[instrumentName]) return;
         const flag = instrumentsSource[instrumentName][0];
         switch (flag) {
             case 1: // drum
@@ -2236,6 +2248,7 @@ function Synth() {
     };
 
     this.stopSound = (turtle, instrumentName, note) => {
+        if (!instrumentsSource[instrumentName] || !instruments[turtle]?.[instrumentName]) return;
         const flag = instrumentsSource[instrumentName][0];
         switch (flag) {
             case 1: // drum
@@ -2252,6 +2265,8 @@ function Synth() {
     };
 
     this.loop = (turtle, instrumentName, note, duration, start, bpm, velocity) => {
+        if (!instrumentsSource[instrumentName] || !instruments[turtle]?.[instrumentName])
+            return null;
         const synthA = instruments[turtle][instrumentName];
         const flag = instrumentsSource[instrumentName][0];
         const now = Tone.now();
