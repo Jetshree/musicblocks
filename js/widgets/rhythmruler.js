@@ -1972,14 +1972,14 @@ class RhythmRuler {
      * @returns {void}
      */
     __pause() {
-        const img = document.createElement("img");
-        img.src = "header-icons/play-button.svg";
-        img.title = _("Play all");
-        img.alt = _("Play all");
-        img.height = RhythmRuler.ICONSIZE;
-        img.width = RhythmRuler.ICONSIZE;
-        img.style.verticalAlign = "middle";
-        this._playAllCell.replaceChildren(img);
+        this._playAllCell.innerHTML = `<img 
+                src="header-icons/play-button.svg" 
+                title="${_("Play all")}" 
+                alt="${_("Play all")}" 
+                height="${RhythmRuler.ICONSIZE}" 
+                width="${RhythmRuler.ICONSIZE}" 
+                vertical-align="middle"
+            >`;
         this._playing = false;
         this._playingAll = false;
         this._playingOne = false;
