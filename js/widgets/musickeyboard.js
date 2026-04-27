@@ -2394,7 +2394,7 @@ function MusicKeyboard(activity) {
         index = parseInt(index);
         if (
             this.activity.blocks.blockList[
-                this.layout[this.layout.length - index - 1].blockNumber
+            this.layout[this.layout.length - index - 1].blockNumber
             ] === undefined
         ) {
             return;
@@ -2824,10 +2824,10 @@ function MusicKeyboard(activity) {
                 newel2.setAttribute(
                     "alt",
                     this.displayLayout[p].noteName +
-                        "__" +
-                        this.displayLayout[p].noteOctave +
-                        "__" +
-                        this.displayLayout[p].blockNumber
+                    "__" +
+                    this.displayLayout[p].noteOctave +
+                    "__" +
+                    this.displayLayout[p].blockNumber
                 );
                 this.idContainer.push([
                     "blackRow" + myrow2Id.toString(),
@@ -2851,10 +2851,10 @@ function MusicKeyboard(activity) {
                 newel.setAttribute(
                     "alt",
                     this.displayLayout[p].noteName +
-                        "__" +
-                        this.displayLayout[p].voice +
-                        "__" +
-                        this.displayLayout[p].blockNumber
+                    "__" +
+                    this.displayLayout[p].voice +
+                    "__" +
+                    this.displayLayout[p].blockNumber
                 );
                 this.idContainer.push([
                     "whiteRow" + myrowId.toString(),
@@ -2881,10 +2881,10 @@ function MusicKeyboard(activity) {
                 newel.setAttribute(
                     "alt",
                     this.displayLayout[p].noteName +
-                        "__" +
-                        this.displayLayout[p].noteOctave +
-                        "__" +
-                        this.displayLayout[p].blockNumber
+                    "__" +
+                    this.displayLayout[p].noteOctave +
+                    "__" +
+                    this.displayLayout[p].blockNumber
                 );
                 this.idContainer.push([
                     "hertzRow" + myrow3Id.toString(),
@@ -2930,10 +2930,10 @@ function MusicKeyboard(activity) {
                 newel2.setAttribute(
                     "alt",
                     this.displayLayout[p].noteName +
-                        "__" +
-                        this.displayLayout[p].noteOctave +
-                        "__" +
-                        this.displayLayout[p].blockNumber
+                    "__" +
+                    this.displayLayout[p].noteOctave +
+                    "__" +
+                    this.displayLayout[p].blockNumber
                 );
                 this.idContainer.push([
                     "blackRow" + myrow2Id.toString(),
@@ -2993,10 +2993,10 @@ function MusicKeyboard(activity) {
                 newel2.setAttribute(
                     "alt",
                     this.displayLayout[p].noteName +
-                        "__" +
-                        this.displayLayout[p].noteOctave +
-                        "__" +
-                        this.displayLayout[p].blockNumber
+                    "__" +
+                    this.displayLayout[p].noteOctave +
+                    "__" +
+                    this.displayLayout[p].blockNumber
                 );
                 this.idContainer.push([
                     "blackRow" + myrow2Id.toString(),
@@ -3039,10 +3039,10 @@ function MusicKeyboard(activity) {
                 newel.setAttribute(
                     "alt",
                     this.displayLayout[p].noteName +
-                        "__" +
-                        this.displayLayout[p].noteOctave +
-                        "__" +
-                        this.displayLayout[p].blockNumber
+                    "__" +
+                    this.displayLayout[p].noteOctave +
+                    "__" +
+                    this.displayLayout[p].blockNumber
                 );
                 this.idContainer.push([
                     "whiteRow" + myrowId.toString(),
@@ -3401,50 +3401,6 @@ function MusicKeyboard(activity) {
     this.clearBlocks = function () {
         this.noteNames = [];
         this.octaves = [];
-    };
-
-    /**
-     * @deprecated This method is deprecated and should no longer be used.
-     * Adds a button to the specified row with the given icon, icon size, and label.
-     * @memberof ClassName
-     * @param {HTMLTableRowElement} row - The table row element to which the button will be added.
-     * @param {string} icon - The filename of the icon image.
-     * @param {number} iconSize - The size of the icon image (height and width).
-     * @param {string} label - The label or tooltip text for the button.
-     * @returns {HTMLTableCellElement} The cell element containing the button.
-     */
-    this._addButton = function (row, icon, iconSize, label) {
-        const cell = row.insertCell(-1);
-        const img = document.createElement("img");
-        img.src = "header-icons/" + icon;
-        img.title = label;
-        img.alt = label;
-        img.height = iconSize;
-        img.width = iconSize;
-        img.style.verticalAlign = "middle";
-        img.style.alignContent = "center";
-        cell.replaceChildren(
-            document.createTextNode("\u00A0\u00A0"),
-            img,
-            document.createTextNode("\u00A0\u00A0")
-        );
-        cell.style.width = BUTTONSIZE + "px";
-        cell.style.minWidth = cell.style.width;
-        cell.style.maxWidth = cell.style.width;
-        cell.style.height = cell.style.width;
-        cell.style.minHeight = cell.style.height;
-        cell.style.maxHeight = cell.style.height;
-        cell.style.backgroundColor = platformColor.selectorBackground;
-
-        cell.onmouseover = function () {
-            this.style.backgroundColor = platformColor.selectorBackgroundHOVER;
-        };
-
-        cell.onmouseout = function () {
-            this.style.backgroundColor = platformColor.selectorBackground;
-        };
-
-        return cell;
     };
 
     /**
