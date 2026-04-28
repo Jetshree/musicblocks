@@ -212,3 +212,7 @@ class ProjectViewer {
         });
     }
 }
+
+if (typeof module !== "undefined" && module.exports) {
+    module.exports = ProjectViewer;
+}
