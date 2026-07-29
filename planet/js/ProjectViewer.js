@@ -35,6 +35,8 @@ class ProjectViewer {
         this.ReportDescriptionError = _("Report description required");
         this.ReportDescriptionTooLongError = _("Report description too long");
         this.id = null;
+        // Store listener references for later cleanup
+        this._listenerRefs = [];
     }
 
     open(id) {
@@ -186,30 +188,38 @@ class ProjectViewer {
         document.getElementById("projectviewer-report-card").style.display = "none";
     }
 
+    /**
+     * Initialise UI listeners. If called multiple times, old listeners are removed first.
+     */
     init() {
-        document.getElementById("projectviewer-download-file").addEventListener("click", evt => {
-            this.download();
-        });
+        // Ensure any previous listeners are cleared – safe‑guard for repeated init()
+        this.destroy();
 
-        document.getElementById("projectviewer-open-mb").addEventListener("click", evt => {
-            this.openProject();
-        });
+        const register = (elemId, type, handler) => {
+            const el = document.getElementById(elemId);
+            if (!el) return;
+            const bound = handler.bind(this);
+            el.addEventListener(type, bound);
+            this._listenerRefs.push({ el, type, bound });
+        };
 
-        document.getElementById("projectviewer-merge-mb").addEventListener("click", evt => {
-            this.mergeProject();
-        });
+        register("projectviewer-download-file", "click", this.download);
+        register("projectviewer-open-mb", "click", this.openProject);
+        register("projectviewer-merge-mb", "click", this.mergeProject);
+        register("projectviewer-report-project", "click", this.openReporter);
+        register("projectviewer-report-submit", "click", this.submitReporter);
+        register("projectviewer-report-close", "click", this.closeReporter);
+    }
 
-        document.getElementById("projectviewer-report-project").addEventListener("click", evt => {
-            this.openReporter();
+    /**
+     * Remove all listeners that were added via init().
+     */
+    destroy() {
+        if (!this._listenerRefs) return;
+        this._listenerRefs.forEach(({ el, type, bound }) => {
+            el.removeEventListener(type, bound);
         });
-
-        document.getElementById("projectviewer-report-submit").addEventListener("click", evt => {
-            this.submitReporter();
-        });
-
-        document.getElementById("projectviewer-report-close").addEventListener("click", evt => {
-            this.closeReporter();
-        });
+        this._listenerRefs = [];
     }
 }
 
