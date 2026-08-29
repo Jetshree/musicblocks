@@ -13,7 +13,7 @@ reviews:
         enabled: true
         drafts: false
         base_branches:
-            - "master"
+            - "test-coderabbit"
 
     path_filters:
         - "!**/node_modules/**"
