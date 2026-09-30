@@ -139,7 +139,6 @@ const {
     getModeLabel,
     getModeNameFromLabel,
     getModeSliceColors,
-    updateModeWheelItems,
     getModeGroupTitleFont,
     temperamentHasRatios,
     parseSclFile,
@@ -195,6 +194,10 @@ describe("musicutils", () => {
                 path.join(__dirname, "..", "musicutils-buildscale.js"),
                 "utf8"
             );
+            const pitchinfo = fs.readFileSync(
+                path.join(__dirname, "..", "musicutils-pitchinfo.js"),
+                "utf8"
+            );
             const source = fs.readFileSync(path.join(__dirname, "..", "musicutils.js"), "utf8");
             const sandbox = {
                 TextEncoder,
@@ -215,6 +218,7 @@ describe("musicutils", () => {
             vm.runInContext(modecore, sandbox);
             vm.runInContext(pitchscale, sandbox);
             vm.runInContext(buildscale, sandbox);
+            vm.runInContext(pitchinfo, sandbox);
             vm.runInContext(source, sandbox);
 
             expect(
@@ -4694,48 +4698,6 @@ describe("mode pie menu shared helpers", () => {
                 filledColor: "filled"
             });
             expect(colors).toEqual(["empty", "filled", "empty"]);
-        });
-    });
-
-    describe("updateModeWheelItems", () => {
-        it("updates every title copy and fill attribute then refreshes", () => {
-            const refreshWheel = jest.fn();
-            const wheel = {
-                navItems: [
-                    {
-                        title: "old",
-                        basicNavTitleMax: {},
-                        basicNavTitleMin: {},
-                        hoverNavTitleMax: {},
-                        hoverNavTitleMin: {},
-                        selectedNavTitleMax: {},
-                        selectedNavTitleMin: {},
-                        initNavTitle: {},
-                        fillAttr: "old",
-                        sliceHoverAttr: {},
-                        slicePathAttr: {},
-                        sliceSelectedAttr: {}
-                    }
-                ],
-                refreshWheel
-            };
-
-            updateModeWheelItems(wheel, ["new"], ["#123456"]);
-
-            const item = wheel.navItems[0];
-            expect(item.title).toBe("new");
-            expect(item.basicNavTitleMax.title).toBe("new");
-            expect(item.basicNavTitleMin.title).toBe("new");
-            expect(item.hoverNavTitleMax.title).toBe("new");
-            expect(item.hoverNavTitleMin.title).toBe("new");
-            expect(item.selectedNavTitleMax.title).toBe("new");
-            expect(item.selectedNavTitleMin.title).toBe("new");
-            expect(item.initNavTitle.title).toBe("new");
-            expect(item.fillAttr).toBe("#123456");
-            expect(item.sliceHoverAttr.fill).toBe("#123456");
-            expect(item.slicePathAttr.fill).toBe("#123456");
-            expect(item.sliceSelectedAttr.fill).toBe("#123456");
-            expect(refreshWheel).toHaveBeenCalled();
         });
     });
 
